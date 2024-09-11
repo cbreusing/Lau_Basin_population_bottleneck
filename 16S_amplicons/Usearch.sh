@@ -23,7 +23,6 @@ vsearch --fastq_filter Lau_16S_oriented.fq --fastq_maxee 1 --fastaout Lau_16S_fi
 vsearch --derep_fulllength Lau_16S_filtered.fa --output Lau_16S_uniques.fa --sizeout --relabel Uniq
 usearch11 -unoise3 Lau_16S_uniques.fa -zotus Lau_16S_zotus.fa -tabbedout unoise3.txt
 seqtk seq -a Lau_16S_oriented.fq | sed -re "s/>([A-Za-z0-9]+.*)(\.[0-9]+)/>\1\2;sample=\1/g" > Lau_16S_oriented.fa
-vsearch --usearch_global Lau_16S_oriented.fa --db Lau_16S_zotus.fa --otutabout Lau_16S_zotus.txt --id 0.97 --maxrejects 1000 --strand plus --threads ${SLURM_CPUS_ON_NODE}
 vsearch --search_exact Lau_16S_oriented.fa --db Lau_16S_zotus.fa --otutabout Lau_16S_exact_zotus.txt --strand plus --threads ${SLURM_CPUS_ON_NODE}
 conda deactivate
 
