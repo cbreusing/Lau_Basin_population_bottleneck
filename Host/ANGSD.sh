@@ -39,14 +39,29 @@ Rscript /gpfs/data/rbeinart/Software/ngsTools/Scripts/plotQC.R ANGSD_basin-wide/
 for POP in KM TC TM ABE;
 do
 IND=`cat ANGSD_basin-wide/${POP}.list | wc -l`
-FRAC=`echo "${IND}*0.5" | bc | awk '{print int($1+0.5)}'`
 angsd -P ${SLURM_CPUS_ON_NODE} -bam ANGSD_basin-wide/${POP}.list -ref A_boucheti.Trinity.merged95.filtered.fasta -gl 1 -baq 1 -C 50 -minInd ${IND} -minMapQ 30 -minQ 20 -setMinDepth 2 -setMaxDepth 160 -doCounts 1 -uniqueOnly 1 -remove_bads 1 -only_proper_pairs 1 -doMaf 1 -doMajorMinor 1 -SNP_pval 1e-6 -doGlf 3 -minMaf 0.01 -skipTriallelic 1 -out ANGSD_basin-wide/${POP}
 NSITES=`zcat ANGSD_basin-wide/${POP}.mafs.gz | tail -n+2 | wc -l`
 zcat ANGSD_basin-wide/${POP}.glf.gz > ANGSD_basin-wide/${POP}.glf
 /gpfs/data/rbeinart/Software/ngsTools/ngsF/ngsF.sh --n_ind ${IND} --n_sites ${NSITES} --glf ANGSD_basin-wide/${POP}.glf --out ANGSD_basin-wide/${POP}.indF
+done
+
+cat ANGSD_basin-wide/KM.indF ANGSD_basin-wide/TC.indF ANGSD_basin-wide/ABE_B.indF > ANGSD_basin-wide/Before.indF
+cat ANGSD_basin-wide/TM.indF ANGSD_basin-wide/ABE_A.indF > ANGSD_basin-wide/After.indF
+cat ANGSD_basin-wide/After.indF ANGSD_basin-wide/Before.indF > ANGSD_basin-wide/ELSC.indF
+
+POP=ELSC
+IND=`cat ${POP}.list | wc -l`
+FRAC=`echo "${IND}*0.75" | bc | awk '{print int($1+0.5)}'`
+angsd -P ${SLURM_CPUS_ON_NODE} -bam ${POP}.list -ref A_boucheti.Trinity.merged95.filtered.fasta -gl 1 -doGlf 1 -baq 1 -C 50 -minInd ${FRAC} -minMapQ 30 -minQ 20 -setMinDepth 2 -setMaxDepth 160 -doCounts 1 -uniqueOnly 1 -remove_bads 1 -only_proper_pairs 1 -doMaf 1 -doMajorMinor 1 -SNP_pval 1e-6 -dosnpstat 1 -doHWE 1 -sb_pval 0.05 -hetbias_pval 0.05 -makeMatrix 1 -doIBS 1 -doCov 1 -doPost 1 -doGeno 2 -minMaf 0.01 -indF ANGSD_basin-wide/${POP}.indF -skipTriallelic 1 -out ANGSD_basin-wide/A_boucheti
+zcat ANGSD_basin-wide/${POP}.mafs.gz | tail -n+2 | perl -anle 'print $F[0] . "\t" . $F[1]' ANGSD_basin-wide/sites.txt
+angsd sites index ANGSD_basin-wide/sites.txt
+
+for POP in KM TC TM ABE;
+do
+IND=`cat ANGSD_basin-wide/${POP}.list | wc -l`
+FRAC=`echo "${IND}*0.5" | bc | awk '{print int($1+0.5)}'`
 angsd -P ${SLURM_CPUS_ON_NODE} -bam ANGSD_basin-wide/${POP}.list -ref A_boucheti.Trinity.merged95.filtered.fasta -anc A_boucheti.Trinity.merged95.filtered.fasta -gl 1 -baq 1 -C 50 -minInd ${FRAC} -minMapQ 30 -minQ 20 -setMinDepth 2 -setMaxDepth 160 -doCounts 1 -uniqueOnly 1 -remove_bads 1 -only_proper_pairs 1 -doMaf 1 -doMajorMinor 4 -doSaf 2 -indF ANGSD_basin-wide/${POP}.indF -out ANGSD_basin-wide/${POP}
 /gpfs/data/rbeinart/Software/ngsTools/angsd/misc/realSFS ANGSD_basin-wide/${POP}.saf.idx -tole 1e-6 -maxIter 5000 -P ${SLURM_CPUS_ON_NODE} -fold 1 > ANGSD_basin-wide/${POP}.sfs
-angsd sites index ANGSD_basin-wide/sites.txt
 angsd -P ${SLURM_CPUS_ON_NODE} -bam ANGSD_basin-wide/${POP}.list -ref A_boucheti.Trinity.merged95.filtered.fasta -anc A_boucheti.Trinity.merged95.filtered.fasta -gl 1 -baq 1 -C 50 -minInd ${FRAC} -sites ANGSD_basin-wide/sites.txt -minMapQ 30 -minQ 20 -setMinDepth 2 -setMaxDepth 160 -doCounts 1 -uniqueOnly 1 -remove_bads 1 -only_proper_pairs 1 -doMaf 1 -doMajorMinor 4 -doSaf 2 -indF ANGSD_basin-wide/${POP}.indF -doThetas 1 -pest ANGSD_basin-wide/${POP}.sfs -out ANGSD_basin-wide/${POP}
 done
 
@@ -70,10 +85,6 @@ done
 /gpfs/data/rbeinart/Software/ngsTools/angsd/misc/realSFS fst stats ANGSD_basin-wide/TC-TM.fst.idx -whichFST 1 -maxIter 5000 > ANGSD_basin-wide/TC-TM.fst.txt
 /gpfs/data/rbeinart/Software/ngsTools/angsd/misc/realSFS fst stats ANGSD_basin-wide/ABE-TM.fst.idx -whichFST 1 -maxIter 5000 > ANGSD_basin-wide/ABE-TM.fst.txt
 
-cat ANGSD_basin-wide/KM.indF ANGSD_basin-wide/TC.indF ANGSD_basin-wide/ABE_B.indF > ANGSD_basin-wide/Before.indF
-cat ANGSD_basin-wide/TM.indF ANGSD_basin-wide/ABE_A.indF > ANGSD_basin-wide/After.indF
-cat ANGSD_basin-wide/After.indF ANGSD_basin-wide/Before.indF > ANGSD_basin-wide/ELSC.indF
-
 for POP in Before After;
 do
 IND=`cat ${POP}.list | wc -l`
@@ -96,9 +107,3 @@ perl -anle 'print $F[9]-$F[6]*$F[9] if $. > 1' ANGSD_basin-wide/tmp >> ANGSD_bas
 paste ANGSD_basin-wide/tmp ANGSD_basin-wide/${POP}.Hobs > ANGSD_basin-wide/${POP}.hwe
 rm ANGSD_basin-wide/tmp
 done
-
-POP=ELSC
-IND=`cat ${POP}.list | wc -l`
-FRAC=`echo "${IND}*0.75" | bc | awk '{print int($1+0.5)}'`
-angsd -P ${SLURM_CPUS_ON_NODE} -bam ${POP}.list -ref A_boucheti.Trinity.merged95.filtered.fasta -gl 1 -doGlf 1 -baq 1 -C 50 -minInd ${FRAC} -minMapQ 30 -minQ 20 -setMinDepth 2 -setMaxDepth 160 -doCounts 1 -uniqueOnly 1 -remove_bads 1 -only_proper_pairs 1 -doMaf 1 -doMajorMinor 1 -SNP_pval 1e-6 -dosnpstat 1 -doHWE 1 -sb_pval 0.05 -hetbias_pval 0.05 -makeMatrix 1 -doIBS 1 -doCov 1 -doPost 1 -doGeno 2 -minMaf 0.01 -indF ANGSD_basin-wide/${POP}.indF -skipTriallelic 1 -out ANGSD_basin-wide/A_boucheti
-
