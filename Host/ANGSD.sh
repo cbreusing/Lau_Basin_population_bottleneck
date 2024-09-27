@@ -32,10 +32,12 @@ samtools index ${file}.indelqual.bam
 done
 
 rm *.sorted.bam
-rm *.dedup.bam
+rm *.dedup.bam*
 rm *.realigned.bam
 
-angsd -P ${SLURM_CPUS_ON_NODE} -bam ELSC.list -ref A_boucheti.Trinity.merged95.filtered.fasta -out ANGSD_basin-wide/A_boucheti.qc -uniqueOnly 1 -remove_bads 1 -only_proper_pairs 1 -C 50 -baq 1 -minMapQ 30 -doQsDist 1 -doDepth 1 -doCounts 1 -maxDepth 1000
+ls *indelqual.bam > bam.list
+
+angsd -P ${SLURM_CPUS_ON_NODE} -bam bam.list -ref A_boucheti.Trinity.merged95.filtered.fasta -out ANGSD_basin-wide/A_boucheti.qc -uniqueOnly 1 -remove_bads 1 -only_proper_pairs 1 -C 50 -baq 1 -minMapQ 30 -doQsDist 1 -doDepth 1 -doCounts 1 -maxDepth 1000
 Rscript /gpfs/data/rbeinart/Software/ngsTools/Scripts/plotQC.R ANGSD_basin-wide/A_boucheti.qc
 
 for POP in KM TC TM ABE;
@@ -47,7 +49,7 @@ zcat ANGSD_basin-wide/${POP}.glf.pos.gz > ANGSD_basin-wide/${POP}.glf.pos
 cut -f1 ANGSD_basin-wide/${POP}.glf.pos | sort | uniq > ANGSD_basin-wide/${POP}.chrs.txt
 grep -f ANGSD_basin-wide/${POP}.chrs.txt ANGSD_basin-wide/${POP}.glf.pos | awk -F"\t" '!_[$1]++' | perl -anle 'print $F[0] . "\t" . $F[1]' > ANGSD_basin-wide/${POP}.unlinked.pos
 angsd sites index ANGSD_basin-wide/${POP}.unlinked.pos
-angsd -P ${SLURM_CPUS_ON_NODE} -bam ${POP}.list -ref A_boucheti.Trinity.merged95.filtered.fasta -gl 1 -baq 1 -C 50 -minInd ${FRAC} -sites ANGSD_basin-wide/${POP}.unlinked.pos -rf ANGSD_basin-wide/${POP}.chrs.txt -minMapQ 30 -minQ 20 -setMinDepth 2 -setMaxDepth 160 -doCounts 1 -uniqueOnly 1 -remove_bads 1 -only_proper_pairs 1 -doMaf 1 -doMajorMinor 1 -SNP_pval 1e-6 -doGlf 3 -minMaf 0.01 -skipTriallelic 1 -out ANGSD_basin-wide/${POP}
+angsd -P ${SLURM_CPUS_ON_NODE} -bam ANGSD_basin-wide/${POP}.list -ref A_boucheti.Trinity.merged95.filtered.fasta -gl 1 -baq 1 -C 50 -minInd ${FRAC} -sites ANGSD_basin-wide/${POP}.unlinked.pos -rf ANGSD_basin-wide/${POP}.chrs.txt -minMapQ 30 -minQ 20 -setMinDepth 2 -setMaxDepth 160 -doCounts 1 -uniqueOnly 1 -remove_bads 1 -only_proper_pairs 1 -doMaf 1 -doMajorMinor 1 -SNP_pval 1e-6 -doGlf 3 -minMaf 0.01 -skipTriallelic 1 -out ANGSD_basin-wide/${POP}
 NSITES=`zcat ANGSD_basin-wide/${POP}.mafs.gz | tail -n+2 | wc -l`
 zcat ANGSD_basin-wide/${POP}.glf.gz > ANGSD_basin-wide/${POP}.glf
 /gpfs/data/rbeinart/Software/ngsTools/ngsF/ngsF.sh --n_ind ${IND} --n_sites ${NSITES} --glf ANGSD_basin-wide/${POP}.glf --out ANGSD_basin-wide/${POP}.indF
