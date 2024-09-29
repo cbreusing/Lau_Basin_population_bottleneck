@@ -96,6 +96,15 @@ realSFS fst stats ANGSD_basin-wide/TC-ABE.fst.idx -whichFST 1 -maxIter 5000 > AN
 realSFS fst stats ANGSD_basin-wide/TC-TM.fst.idx -whichFST 1 -maxIter 5000 > ANGSD_basin-wide/TC-TM.fst.txt
 realSFS fst stats ANGSD_basin-wide/ABE-TM.fst.idx -whichFST 1 -maxIter 5000 > ANGSD_basin-wide/ABE-TM.fst.txt
 
+for i in `cat ANGSD_basin-wide/*fst.idx`
+do 
+realSFS fst print ANGSD_basin-wide/${i} > ANGSD_basin-wide/${i}.out
+grep -f ANGSD_basin-wide/sites.txt ANGSD_basin-wide/${i}.out > ANGSD_basin-wide/${i}.sites.out
+sum1=`awk -F "\t" '{sum=sum+$3} END{print sum}' ANGSD_basin-wide/${i}.sites.out`
+sum2=`awk -F "\t" '{sum=sum+$4} END{print sum}' ANGSD_basin-wide/${i}.sites.out`
+echo "scale=4 ; $sum1 / $sum2" | bc > ANGSD_basin-wide/${i}.sites.txt
+done
+
 for POP in Before After;
 do
 IND=`cat ${POP}.list | wc -l`
