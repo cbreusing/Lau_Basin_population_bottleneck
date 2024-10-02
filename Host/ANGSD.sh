@@ -48,7 +48,7 @@ FRAC=`echo "${IND}*0.5" | bc | awk '{print int($1+0.5)}'`
 angsd -P ${SLURM_CPUS_ON_NODE} -bam ANGSD_basin-wide/${POP}.list -ref A_boucheti.Trinity.merged95.filtered.fasta -gl 1 -baq 1 -C 50 -minInd ${FRAC} -minMapQ 30 -minQ 20 -setMinDepth 2 -setMaxDepth 160 -doCounts 1 -uniqueOnly 1 -remove_bads 1 -only_proper_pairs 1 -doMaf 1 -doMajorMinor 1 -SNP_pval 1e-6 -doGlf 3 -minMaf 0.01 -skipTriallelic 1 -out ANGSD_basin-wide/${POP}
 zcat ANGSD_basin-wide/${POP}.glf.pos.gz > ANGSD_basin-wide/${POP}.glf.pos
 cut -f1 ANGSD_basin-wide/${POP}.glf.pos | sort | uniq > ANGSD_basin-wide/${POP}.chrs.txt
-grep -f ANGSD_basin-wide/${POP}.chrs.txt ANGSD_basin-wide/${POP}.glf.pos | awk -F"\t" '!_[$1]++' | perl -anle 'print $F[0] . "\t" . $F[1]' | sort -k1 -u > ANGSD_basin-wide/${POP}.unlinked.pos
+grep -f ANGSD_basin-wide/${POP}.chrs.txt ANGSD_basin-wide/${POP}.glf.pos | awk -F"\t" '!_[$1]++' | perl -anle 'print $F[0] . "\t" . $F[1]' > ANGSD_basin-wide/${POP}.unlinked.pos
 angsd sites index ANGSD_basin-wide/${POP}.unlinked.pos
 angsd -P ${SLURM_CPUS_ON_NODE} -bam ANGSD_basin-wide/${POP}.list -ref A_boucheti.Trinity.merged95.filtered.fasta -gl 1 -baq 1 -C 50 -minInd ${FRAC} -sites ANGSD_basin-wide/${POP}.unlinked.pos -rf ANGSD_basin-wide/${POP}.chrs.txt -minMapQ 30 -minQ 20 -setMinDepth 2 -setMaxDepth 160 -doCounts 1 -uniqueOnly 1 -remove_bads 1 -only_proper_pairs 1 -doMaf 1 -doMajorMinor 1 -SNP_pval 1e-6 -doGlf 3 -minMaf 0.01 -skipTriallelic 1 -out ANGSD_basin-wide/${POP}
 NSITES=`zcat ANGSD_basin-wide/${POP}.mafs.gz | tail -n+2 | wc -l`
@@ -96,13 +96,13 @@ realSFS fst stats ANGSD_basin-wide/TC-ABE.fst.idx -whichFST 1 -maxIter 5000 > AN
 realSFS fst stats ANGSD_basin-wide/TC-TM.fst.idx -whichFST 1 -maxIter 5000 > ANGSD_basin-wide/TC-TM.fst.txt
 realSFS fst stats ANGSD_basin-wide/ABE-TM.fst.idx -whichFST 1 -maxIter 5000 > ANGSD_basin-wide/ABE-TM.fst.txt
 
-for i in `cat ANGSD_basin-wide/*fst.idx`
+for i in KM-TC KM-ABE KM-TM TC-ABE TC-TM ABE-TM;
 do 
-realSFS fst print ANGSD_basin-wide/${i} > ANGSD_basin-wide/${i}.out
-grep -f ANGSD_basin-wide/sites.txt ANGSD_basin-wide/${i}.out > ANGSD_basin-wide/${i}.sites.out
-sum1=`awk -F "\t" '{sum=sum+$3} END{print sum}' ANGSD_basin-wide/${i}.sites.out`
-sum2=`awk -F "\t" '{sum=sum+$4} END{print sum}' ANGSD_basin-wide/${i}.sites.out`
-echo "scale=4 ; $sum1 / $sum2" | bc > ANGSD_basin-wide/${i}.sites.txt
+realSFS fst print ANGSD_basin-wide/${i}.fst.idx > ANGSD_basin-wide/${i}.fst.out
+grep -wf ANGSD_basin-wide/sites.txt ANGSD_basin-wide/${i}.fst.out > ANGSD_basin-wide/${i}.fst.sites.out
+sum1=`awk -F "\t" '{sum=sum+$3} END{print sum}' ANGSD_basin-wide/${i}.fst.sites.out`
+sum2=`awk -F "\t" '{sum=sum+$4} END{print sum}' ANGSD_basin-wide/${i}.fst.sites.out`
+echo "scale=4 ; $sum1 / $sum2" | bc > ANGSD_basin-wide/${i}.fst.sites.txt
 done
 
 for POP in Before After;
