@@ -8,7 +8,7 @@ library(vegan)
 library(rbiom)
 library(metagMisc)
 
-setwd("/users/corinna/Documents/Work/Beinart_Lab/Mollusk_symbioses_bottleneck/Lau_16S_FL_amplicons")
+setwd("/users/corinna/Documents/Work/Beinart_Lab/Mollusk_symbioses_bottleneck/Lau_16S_FL_amplicons/V4_region")
 
 # Import final ASV biom and mapping files
 biomFile <- import_biom("Lau_16S_exact_zotus_tax.biom", parseFunction = parse_taxonomy_default)
@@ -22,7 +22,7 @@ names(repsetFile) <- gsub("\\s.+$", "", names(repsetFile))
 
 # Create full phyloseq object
 phyloseq <- merge_phyloseq(biomMapFile, repsetFile)
-colnames(tax_table(phyloseq)) = c("Domain", "Phylum", "Class", "Order", "Family", "Genus")
+colnames(tax_table(phyloseq)) = c("Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species")
 
 # Remove low abundance ASVs
 marmic = filter_taxa(phyloseq, function (x) sum(x) > 0, TRUE)

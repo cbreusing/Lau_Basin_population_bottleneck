@@ -44,10 +44,8 @@ conda deactivate
 mv qiime2_results/taxonomy.tsv Lau_16S_taxonomy.tsv
 rm -r qiime2_results
 
-grep "Sulfurimonadaceae" Lau_16S_taxonomy.tsv | grep -v "Thiovulum" > Lau_16S_taxonomy_filtered.tsv
-grep "Thioglobaceae" Lau_16S_taxonomy.tsv >> Lau_16S_taxonomy_filtered.tsv 
-grep "Arenicellaceae" Lau_16S_taxonomy.tsv >> Lau_16S_taxonomy_filtered.tsv 
-grep "Thiomicrospiraceae" Lau_16S_taxonomy.tsv | grep -v "Thiomicrorhabdus" | grep -v "Thiomicrospira;" >> Lau_16S_taxonomy_filtered.tsv
+grep "Gammaproteobacteria" Lau_16S_taxonomy.tsv > Lau_16S_taxonomy_filtered.tsv
+grep "Campylobacteria" Lau_16S_taxonomy.tsv >> Lau_16S_taxonomy_filtered.tsv 
 
 perl -anle 'print $F[0]' Lau_16S_taxonomy_filtered.tsv > potential_symbiont_ASVs.txt
 
