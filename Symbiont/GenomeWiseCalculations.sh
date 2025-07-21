@@ -55,8 +55,14 @@ echo -e "${v}\t${v}_SNPs.merged.list" >> Epsilon.merged.txt
 done
 
 conda activate python2
+# Calculation for samples pooled by population
 Rscript /gpfs/data/rbeinart/cbreusing/Scripts/structure.r Epsilon.merged.txt
 python /gpfs/data/rbeinart/cbreusing/Scripts/genome_wise_calculations.py Epsilon.merged.txtFst_pos.txt Epsilon_pangenome.fasta Epsilon.merged
+
+# Calculation for individual samples (to obtain inter-host pi values)
+Rscript /gpfs/data/rbeinart/cbreusing/Scripts/structure.r Epsilon.txt
+python /gpfs/data/rbeinart/cbreusing/Scripts/genome_wise_calculations.py Epsilon.txtFst_pos.txt Epsilon_pangenome.fasta Epsilon
+
 conda deactivate
 
 vcftools --vcf Epsilon.Freebayes.minFiltered.recode.vcf --haploid --TajimaD 500 --out Before --keep Before.list
