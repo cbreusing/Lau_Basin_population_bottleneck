@@ -65,7 +65,7 @@ cat ANGSD_basin-wide/After.indF ANGSD_basin-wide/Before.indF > ANGSD_basin-wide/
 POP=ELSC
 IND=`cat ${POP}.list | wc -l`
 FRAC=`echo "${IND}*0.75" | bc | awk '{print int($1+0.5)}'`
-angsd -P ${SLURM_CPUS_ON_NODE} -bam ${POP}.list -ref A_boucheti.Trinity.merged95.filtered.fasta -gl 1 -doGlf 1 -baq 1 -C 50 -minInd ${FRAC} -minMapQ 30 -minQ 20 -setMinDepth 2 -setMaxDepth 160 -doCounts 1 -uniqueOnly 1 -remove_bads 1 -only_proper_pairs 1 -doMaf 1 -doMajorMinor 1 -SNP_pval 1e-6 -dosnpstat 1 -doHWE 1 -sb_pval 0.05 -hetbias_pval 0.05 -makeMatrix 1 -doIBS 1 -doCov 1 -doPost 1 -doGeno 2 -minMaf 0.01 -indF ANGSD_basin-wide/${POP}.indF -skipTriallelic 1 -out ANGSD_basin-wide/A_boucheti
+angsd -P ${SLURM_CPUS_ON_NODE} -bam ${POP}.list -ref A_boucheti.Trinity.merged95.filtered.fasta -gl 1 -doGlf 1 -baq 1 -C 50 -minInd ${FRAC} -minMapQ 30 -minQ 20 -setMinDepth 2 -setMaxDepth 160 -doCounts 1 -uniqueOnly 1 -remove_bads 1 -only_proper_pairs 1 -doMaf 1 -doMajorMinor 1 -SNP_pval 1e-6 -dosnpstat 1 -doHWE 1 -sb_pval 0.05 -hetbias_pval 0.05 -qscore_pval 0.05 -edge_pval 0.05 -makeMatrix 1 -doIBS 1 -doCov 1 -doPost 1 -doGeno 2 -minMaf 0.01 -indF ANGSD_basin-wide/${POP}.indF -skipTriallelic 1 -out ANGSD_basin-wide/A_boucheti
 zcat ANGSD_basin-wide/${POP}.mafs.gz | tail -n+2 | perl -anle 'print $F[0] . "\t" . $F[1]' > ANGSD_basin-wide/sites.txt
 
 for POP in KM TC TM ABE;
